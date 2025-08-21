@@ -35,7 +35,7 @@ const ProjectManagementDashboard = () => {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/project', {
+      const response = await fetch('https://metronique.onrender.com/api/project', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -55,7 +55,7 @@ const ProjectManagementDashboard = () => {
   const fetchTasks = async (projectId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/work/${projectId}/tasks`, {
+      const response = await fetch(`https://metronique.onrender.com/api/work/${projectId}/tasks`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -75,7 +75,7 @@ const ProjectManagementDashboard = () => {
   const createProject = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/project', {
+      const response = await fetch('https://metronique.onrender.com/api/project', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ const ProjectManagementDashboard = () => {
   const addTask = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/work/${selectedProject._id}/tasks`, {
+      const response = await fetch(`https://metronique.onrender.com/api/work/${selectedProject._id}/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
