@@ -2,10 +2,32 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Folder, Settings, ChevronRight } from 'lucide-react';
+import { Plus, Folder, Settings, ChevronRight, Edit, Trash2 } from 'lucide-react';
 
-const Sidebar = ({ projects, selectedProject, setSelectedProject, setShowProjectForm }) => {
+const Sidebar = ({ 
+  projects, 
+  selectedProject, 
+  setSelectedProject, 
+  setShowProjectForm, 
+  setEditingProject, 
+  setNewProjectName,
+  deleteProject 
+}) => {
   const [hoveredProject, setHoveredProject] = useState(null);
+
+  const handleEditProject = (project, e) => {
+    e.stopPropagation();
+    setEditingProject(project);
+    setNewProjectName(project.projectName);
+    setShowProjectForm(true);
+  };
+
+  const handleDeleteProject = (projectId, e) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this project?')) {
+      deleteProject(projectId);
+    }
+  };
 
   return (
     <motion.div 
@@ -32,7 +54,11 @@ const Sidebar = ({ projects, selectedProject, setSelectedProject, setShowProject
       {/* New Project Button */}
       <div className="p-6">
         <motion.button 
-          onClick={() => setShowProjectForm(true)}
+          onClick={() => {
+            setEditingProject(null);
+            setNewProjectName('');
+            setShowProjectForm(true);
+          }}
           whileHover={{ 
             scale: 1.02,
             boxShadow: "0 10px 30px rgba(59, 130, 246, 0.3)"
@@ -56,6 +82,7 @@ const Sidebar = ({ projects, selectedProject, setSelectedProject, setShowProject
         <div className="overflow-y-auto max-h-[calc(100vh-240px)] px-4 pb-4">
           <ul className="space-y-2">
             {projects && projects.length > 0 ? projects.map((project, index) => (
+              // ...existing code...
               <motion.li 
                 key={project._id}
                 initial={{ x: -50, opacity: 0 }}
@@ -64,11 +91,16 @@ const Sidebar = ({ projects, selectedProject, setSelectedProject, setShowProject
                 onHoverStart={() => setHoveredProject(project._id)}
                 onHoverEnd={() => setHoveredProject(null)}
               >
-                <motion.button
+                <motion.div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelectedProject(project)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedProject(project);
+                  }}
                   whileHover={{ x: 4 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`group relative flex items-center w-full p-4 rounded-xl transition-all duration-300 ${
+                  className={`group relative flex items-center w-full p-4 rounded-xl transition-all duration-300 cursor-pointer ${
                     selectedProject && selectedProject._id === project._id 
                       ? 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200/50 shadow-md' 
                       : 'hover:bg-white hover:shadow-lg border border-transparent'
@@ -94,21 +126,25 @@ const Sidebar = ({ projects, selectedProject, setSelectedProject, setShowProject
                     </span>
                   </div>
                   
-                  {/* Arrow indicator */}
-                  <motion.div
-                    animate={{ 
-                      opacity: hoveredProject === project._id || (selectedProject && selectedProject._id === project._id) ? 1 : 0,
-                      x: hoveredProject === project._id || (selectedProject && selectedProject._id === project._id) ? 0 : -10
-                    }}
-                    transition={{ duration: 0.2 }}
-                    className="flex-shrink-0"
-                  >
-                    <ChevronRight className={`w-4 h-4 ${
-                      selectedProject && selectedProject._id === project._id
-                        ? 'text-blue-600'
-                        : 'text-gray-400'
-                    }`} />
-                  </motion.div>
+                  {/* Action buttons */}
+                  <div className="flex items-center space-x-1">
+                    <motion.button
+                      onClick={(e) => handleEditProject(project, e)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="p-1 text-gray-500 hover:text-blue-600 transition-colors"
+                    >
+                      <Edit className="w-3 h-3" />
+                    </motion.button>
+                    <motion.button
+                      onClick={(e) => handleDeleteProject(project._id, e)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="p-1 text-gray-500 hover:text-red-600 transition-colors"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </motion.button>
+                  </div>
                   
                   {/* Selection indicator */}
                   {selectedProject && selectedProject._id === project._id && (
@@ -118,8 +154,9 @@ const Sidebar = ({ projects, selectedProject, setSelectedProject, setShowProject
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
-                </motion.button>
+                </motion.div>
               </motion.li>
+// ...existing code...
             )) : (
               <motion.li
                 initial={{ opacity: 0 }}

@@ -1,11 +1,10 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, User, Calendar, Clock, X, CheckCircle2, AlertCircle, PlayCircle, PauseCircle } from 'lucide-react';
 
 const MainContent = ({ 
   selectedProject, 
-  tasks = [], 
+  tasks, 
   setShowTaskForm, 
   showProjectForm, 
   setShowProjectForm, 
@@ -15,310 +14,221 @@ const MainContent = ({
   showTaskForm, 
   newTask, 
   setNewTask, 
-  addTask 
+  addTask,
+  updateTask,
+  deleteTask,
+  editingTask,
+  setEditingTask,
+  setShowEditTaskForm,
+  showEditTaskForm
 }) => {
-  const getStatusConfig = (status) => {
+  const getStatusColor = (status) => {
     switch (status) {
-      case 'Close': 
-        return { 
-          bg: 'bg-gradient-to-r from-green-100 to-emerald-100', 
-          text: 'text-green-800', 
-          icon: CheckCircle2,
-          border: 'border-green-200'
-        };
-      case 'Ongoing': 
-        return { 
-          bg: 'bg-gradient-to-r from-blue-100 to-cyan-100', 
-          text: 'text-blue-800', 
-          icon: PlayCircle,
-          border: 'border-blue-200'
-        };
-      case 'In Review': 
-        return { 
-          bg: 'bg-gradient-to-r from-yellow-100 to-amber-100', 
-          text: 'text-yellow-800', 
-          icon: PauseCircle,
-          border: 'border-yellow-200'
-        };
-      default: 
-        return { 
-          bg: 'bg-gradient-to-r from-gray-100 to-slate-100', 
-          text: 'text-gray-800', 
-          icon: AlertCircle,
-          border: 'border-gray-200'
-        };
+      case 'Close': return 'bg-green-100 text-green-800';
+      case 'Ongoing': return 'bg-blue-100 text-blue-800';
+      case 'In Review': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15
-      }
-    }
-  };
-
-return (
-    <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 min-h-screen">
-        {selectedProject ? (
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="p-8"
-            >
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <motion.div
-                        initial={{ x: -50, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.2, duration: 0.5 }}
-                    >
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            {selectedProject.projectName}
-                        </h1>
-                        <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mt-2"></div>
-                    </motion.div>
-                    
-                    <motion.button 
-                        onClick={() => setShowTaskForm(true)}
-                        whileHover={{ 
-                            scale: 1.05,
-                boxShadow: "0 20px 40px rgba(59, 130, 246, 0.4)"
+  return (
+    <div className="flex-1 overflow-auto">
+      {selectedProject ? (
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-gray-800">{selectedProject.projectName}</h1>
+              <div className="ml-4 flex space-x-2">
+                <button 
+                  onClick={() => setShowEditProjectForm(true)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button 
+                  onClick={() => deleteProject(selectedProject._id)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                setNewTask({
+                  taskName: '',
+                  status: 'Open',
+                  assignTo: '',
+                  startDate: '',
+                  endDate: '',
+                  hours: 0,
+                  githubLink: '',
+                  reportLink: ''
+                });
+                setEditingTask(null);
+                setShowTaskForm(true);
               }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="group flex items-center px-6 py-3 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-300/50 transition-all duration-300 shadow-lg"
+              className="flex items-center px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-              <span className="font-semibold">Add Task</span>
-            </motion.button>
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Add Task
+            </button>
           </div>
 
-          {/* Tasks Grid */}
           {tasks.length > 0 ? (
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-            >
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <AnimatePresence>
-                {tasks.map((task, index) => {
-                  const statusConfig = getStatusConfig(task.status);
-                  const StatusIcon = statusConfig.icon;
-                  
-                  return (
-                    <motion.div 
-                      key={task._id}
-                      variants={itemVariants}
-                      layout
-                      whileHover={{ 
-                        y: -8,
-                        scale: 1.02,
-                        boxShadow: "0 25px 50px rgba(0,0,0,0.15)"
-                      }}
-                      className="group relative p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50"
-                    >
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
-                      {/* Status Badge */}
-                      <div className="flex items-center justify-between mb-4">
-                        <motion.h3 
-                          className="text-xl font-bold text-gray-800 group-hover:text-gray-900 transition-colors duration-300"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: index * 0.1 + 0.3 }}
-                        >
-                          {task.taskName}
-                        </motion.h3>
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          className={`flex items-center px-3 py-1.5 text-xs font-semibold rounded-full ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} border backdrop-blur-sm`}
-                        >
-                          <StatusIcon className="w-3 h-3 mr-1" />
+                {tasks.map((task) => (
+                  <motion.div 
+                    key={task._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="p-4 bg-white rounded-lg shadow-md"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-800">{task.taskName}</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(task.status)}`}>
                           {task.status}
-                        </motion.div>
+                        </span>
+                        <button 
+                          onClick={() => {
+                            setEditingTask(task);
+                            setShowEditTaskForm(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => deleteTask(task._id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 text-sm text-gray-600">
+                      <div className="flex items-center mb-1">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        {task.assignTo || 'Unassigned'}
                       </div>
                       
-                      {/* Task Details */}
-                      <div className="space-y-3 text-sm text-gray-600">
-                        <motion.div 
-                          className="flex items-center group-hover:text-gray-700 transition-colors duration-300"
-                          whileHover={{ x: 2 }}
-                        >
-                          <div className="p-1.5 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 mr-3">
-                            <User className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <span className="font-medium">{task.assignTo || 'Unassigned'}</span>
-                        </motion.div>
-                        
-                        <motion.div 
-                          className="flex items-center group-hover:text-gray-700 transition-colors duration-300"
-                          whileHover={{ x: 2 }}
-                        >
-                          <div className="p-1.5 rounded-lg bg-gradient-to-r from-green-100 to-emerald-100 mr-3">
-                            <Calendar className="w-4 h-4 text-green-600" />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-500">Duration</span>
-                            <span className="font-medium">
-                              {new Date(task.startDate).toLocaleDateString()} - {new Date(task.endDate).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </motion.div>
-                        
-                        <motion.div 
-                          className="flex items-center group-hover:text-gray-700 transition-colors duration-300"
-                          whileHover={{ x: 2 }}
-                        >
-                          <div className="p-1.5 rounded-lg bg-gradient-to-r from-amber-100 to-orange-100 mr-3">
-                            <Clock className="w-4 h-4 text-amber-600" />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-500">Estimated</span>
-                            <span className="font-medium">{task.hours} hours</span>
-                          </div>
-                        </motion.div>
+                      <div className="flex items-center mb-1">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {new Date(task.startDate).toLocaleDateString()} - {new Date(task.endDate).toLocaleDateString()}
+                      </div>
+                      
+                      <div className="flex items-center mb-1">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {task.hours} hours
                       </div>
 
-                      {/* Hover effect border */}
-                      <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-gradient-to-r group-hover:from-blue-300 group-hover:to-purple-300 transition-all duration-300"></div>
-                    </motion.div>
-                  );
-                })}
+                      {task.githubLink && (
+                        <div className="flex items-center mb-1">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          <a href={task.githubLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            GitHub Repository
+                          </a>
+                        </div>
+                      )}
+
+                      {task.reportLink && (
+                        <div className="flex items-center mb-1">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <a href={task.reportLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            View Report
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
               </AnimatePresence>
-            </motion.div>
+            </div>
           ) : (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="flex flex-col items-center justify-center p-16 text-center bg-white/60 backdrop-blur-sm rounded-3xl shadow-lg border border-white/50"
-            >
-              <motion.div
-                animate={{ 
-                  y: [0, -10, 0],
-                  rotate: [0, 5, 0, -5, 0]
+            <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-lg shadow-md">
+              <svg className="w-16 h-16 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <h3 className="mb-2 text-lg font-medium text-gray-900">No tasks yet</h3>
+              <p className="text-gray-500">Get started by adding a new task to this project.</p>
+              <button 
+                onClick={() => {
+                  setNewTask({
+                    taskName: '',
+                    status: 'Open',
+                    assignTo: '',
+                    startDate: '',
+                    endDate: '',
+                    hours: 0,
+                    githubLink: '',
+                    reportLink: ''
+                  });
+                  setEditingTask(null);
+                  setShowTaskForm(true);
                 }}
-                transition={{ 
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="w-24 h-24 mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center"
-              >
-                <CheckCircle2 className="w-12 h-12 text-blue-600" />
-              </motion.div>
-              <h3 className="mb-4 text-2xl font-bold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">
-                No tasks yet
-              </h3>
-              <p className="mb-6 text-gray-600 max-w-md">
-                Transform your project with organized tasks. Start by adding your first task and watch your productivity soar!
-              </p>
-              <motion.button 
-                onClick={() => setShowTaskForm(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-300/50 transition-all duration-300 shadow-lg font-semibold"
+                className="mt-4 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Add Your First Task
-              </motion.button>
-            </motion.div>
+              </button>
+            </div>
           )}
-        </motion.div>
+        </div>
       ) : (
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col items-center justify-center h-full px-8"
-        >
-          <motion.div
-            animate={{ 
-              scale: [1, 1.1, 1],
-              rotate: [0, 5, 0, -5, 0]
-            }}
-            transition={{ 
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="w-32 h-32 mb-8 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 rounded-full flex items-center justify-center shadow-lg"
-          >
-            <CheckCircle2 className="w-16 h-16 text-blue-600" />
-          </motion.div>
-          <motion.h2 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mb-4 text-4xl font-bold bg-gradient-to-r from-gray-700 via-blue-600 to-purple-600 bg-clip-text text-transparent text-center"
-          >
-            Welcome to Avidus Interactive
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-gray-600 text-center max-w-md text-lg"
-          >
-            Select a project from the sidebar or create a new one to start managing your tasks with style.
-          </motion.p>
-        </motion.div>
+        <div className="flex flex-col items-center justify-center h-full">
+          <svg className="w-24 h-24 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <h2 className="mb-2 text-2xl font-semibold text-gray-700">No Project Selected</h2>
+          <p className="text-gray-500">Select a project from the sidebar or create a new one to get started.</p>
+        </div>
       )}
 
-      {/* Enhanced Project Creation Modal */}
+      {/* Project Creation Modal */}
       <AnimatePresence>
         {showProjectForm && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
             onClick={() => setShowProjectForm(false)}
           >
             <motion.div 
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="w-full max-w-lg p-8 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/50"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-blue-600 bg-clip-text text-transparent">
-                  Create New Project
-                </h3>
-                <button
-                  onClick={() => setShowProjectForm(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              
-              <div className="mb-6">
-                <label htmlFor="projectName" className="block text-sm font-semibold text-gray-700 mb-2">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">
+                {editingProject ? 'Edit Project' : 'Create New Project'}
+              </h3>
+              <div className="mt-4">
+                <label htmlFor="projectName" className="block text-sm font-medium text-gray-700">
                   Project Name
                 </label>
                 <input
@@ -326,93 +236,82 @@ return (
                   id="projectName"
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
-                  placeholder="Enter an amazing project name"
+                  className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter project name"
                 />
               </div>
-              
-              <div className="flex gap-3">
-                <motion.button
+              <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                <button
                   type="button"
-                  onClick={createProject}
+                  onClick={editingProject ? updateProject : createProject}
                   disabled={!newProjectName.trim()}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`flex-1 px-6 py-3 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-300/50 transition-all duration-300 font-semibold ${!newProjectName.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm ${!newProjectName.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Create Project
-                </motion.button>
-                <motion.button
+                  {editingProject ? 'Update' : 'Create'}
+                </button>
+                <button
                   type="button"
-                  onClick={() => setShowProjectForm(false)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1 px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-xl shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-300 font-semibold"
+                  onClick={() => {
+                    setShowProjectForm(false);
+                    setEditingProject(null);
+                    setNewProjectName('');
+                  }}
+                  className="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm"
                 >
                   Cancel
-                </motion.button>
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Enhanced Task Creation Modal */}
+      {/* Task Creation Modal */}
       <AnimatePresence>
         {showTaskForm && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
             onClick={() => setShowTaskForm(false)}
           >
             <motion.div 
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/50"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-purple-600 bg-clip-text text-transparent">
-                  Add New Task
-                </h3>
-                <button
-                  onClick={() => setShowTaskForm(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="md:col-span-2">
-                  <label htmlFor="taskName" className="block text-sm font-semibold text-gray-700 mb-2">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">
+                {editingTask ? 'Edit Task' : 'Add New Task'}
+              </h3>
+              <div className="mt-4 space-y-4">
+                <div>
+                  <label htmlFor="taskName" className="block text-sm font-medium text-gray-700">
                     Task Name
                   </label>
                   <input
                     type="text"
                     id="taskName"
-                    value={newTask?.taskName || ''}
+                    value={newTask.taskName}
                     onChange={(e) => setNewTask({...newTask, taskName: e.target.value})}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter task name"
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700">
                     Status
                   </label>
                   <select
                     id="status"
-                    value={newTask?.status || 'pending'}
+                    value={newTask.status}
                     onChange={(e) => setNewTask({...newTask, status: e.target.value})}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="pending">Open</option>
+                    <option value="Open">Open</option>
                     <option value="Ongoing">Ongoing</option>
                     <option value="In Review">In Review</option>
                     <option value="Close">Close</option>
@@ -420,81 +319,120 @@ return (
                 </div>
                 
                 <div>
-                  <label htmlFor="assignTo" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="assignTo" className="block text-sm font-medium text-gray-700">
                     Assign To
                   </label>
                   <input
                     type="text"
                     id="assignTo"
-                    value={newTask?.assignTo || ''}
+                    value={newTask.assignTo}
                     onChange={(e) => setNewTask({...newTask, assignTo: e.target.value})}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
-                    placeholder="Assign to team member"
+                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Assign to"
                   />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      id="startDate"
+                      value={newTask.startDate}
+                      onChange={(e) => setNewTask({...newTask, startDate: e.target.value})}
+                      className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      id="endDate"
+                      value={newTask.endDate}
+                      onChange={(e) => setNewTask({...newTask, endDate: e.target.value})}
+                      className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
                 </div>
                 
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    value={newTask?.startDate || ''}
-                    onChange={(e) => setNewTask({...newTask, startDate: e.target.value})}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="endDate" className="block text-sm font-semibold text-gray-700 mb-2">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    value={newTask?.endDate || ''}
-                    onChange={(e) => setNewTask({...newTask, endDate: e.target.value})}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
-                  />
-                </div>
-                
-                <div className="md:col-span-2">
-                  <label htmlFor="hours" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="hours" className="block text-sm font-medium text-gray-700">
                     Estimated Hours
                   </label>
                   <input
                     type="number"
                     id="hours"
-                    value={newTask?.hours || ''}
+                    value={newTask.hours}
                     onChange={(e) => setNewTask({...newTask, hours: parseInt(e.target.value) || 0})}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
-                    placeholder="Estimated hours"
+                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="0"
                     min="0"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="githubLink" className="block text-sm font-medium text-gray-700">
+                    GitHub Link
+                  </label>
+                  <input
+                    type="url"
+                    id="githubLink"
+                    value={newTask.githubLink}
+                    onChange={(e) => setNewTask({...newTask, githubLink: e.target.value})}
+                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="https://github.com/username/repo"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="reportLink" className="block text-sm font-medium text-gray-700">
+                    Report Link
+                  </label>
+                  <input
+                    type="url"
+                    id="reportLink"
+                    value={newTask.reportLink}
+                    onChange={(e) => setNewTask({...newTask, reportLink: e.target.value})}
+                    className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="https://example.com/report"
                   />
                 </div>
               </div>
               
-              <div className="flex gap-3 mt-8">
-                <motion.button
+              <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                <button
                   type="button"
-                  onClick={addTask}
-                  disabled={!newTask?.taskName?.trim()}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`flex-1 px-6 py-3 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-300/50 transition-all duration-300 font-semibold ${!newTask?.taskName?.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={editingTask ? updateTask : addTask}
+                  disabled={!newTask.taskName.trim()}
+                  className={`inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm ${!newTask.taskName.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Add Task
-                </motion.button>
-                <motion.button
+                  {editingTask ? 'Update Task' : 'Add Task'}
+                </button>
+                <button
                   type="button"
-                  onClick={() => setShowTaskForm(false)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1 px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-xl shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-300 font-semibold"
+                  onClick={() => {
+                    setShowTaskForm(false);
+                    setEditingTask(null);
+                    setNewTask({
+                      taskName: '',
+                      status: 'Open',
+                      assignTo: '',
+                      startDate: '',
+                      endDate: '',
+                      hours: 0,
+                      githubLink: '',
+                      reportLink: ''
+                    });
+                  }}
+                  className="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm"
                 >
                   Cancel
-                </motion.button>
+                </button>
               </div>
             </motion.div>
           </motion.div>
