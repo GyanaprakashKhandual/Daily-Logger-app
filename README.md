@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📌 Project Management Application (Frontend)
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-13+-000000?style=for-the-badge&logo=next.js)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-Animation-ff69b4?style=for-the-badge&logo=framer)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✅ About the Project
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This is the **Frontend Repository** of the **Project Management Application**.  
+The app helps users manage **projects and tasks** with a clean, modern UI built using **Next.js**, **TailwindCSS**, and **Framer Motion** for animations.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+✨ **Key Highlights**:
+- ✅ Create & Manage Projects  
+- ✅ Add, Edit, and Delete Tasks  
+- ✅ Interactive Animations (Framer Motion)  
+- ✅ Responsive UI with TailwindCSS  
+- ✅ User-Friendly Dashboard  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🖼️ Screenshots (Demo UI)
 
-To learn more about Next.js, take a look at the following resources:
+_Add some screenshots/gifs here once your UI is ready_  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Tech Stack
 
-## Deploy on Vercel
+- **Next.js** ⚡ (React Framework for SSR/SSG)  
+- **TailwindCSS** 🎨 (Utility-first styling)  
+- **Framer Motion** 🎞️ (Smooth animations)  
+- **Lucide Icons / React Icons** 🔗 (Modern icon set)  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📂 Folder Structure
+
