@@ -8,7 +8,7 @@
 
 ---
 
-## ✅ About the Project
+## ✅ About the Project 
 
 This is the **Frontend Repository** of the **Project Management Application**.  
 The app helps users manage **projects and tasks** with a clean, modern UI built using **Next.js**, **TailwindCSS**, and **Framer Motion** for animations.
